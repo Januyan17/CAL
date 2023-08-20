@@ -23,7 +23,7 @@ module.exports = router;
 async function createGPA(req, res, next) {
   let gpaScore = null;
   let { name } = req.body;
-  
+
   let file = null;
   if (req.files.length) {
     let fileName = req.files[0]?.originalname;
