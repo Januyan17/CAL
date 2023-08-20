@@ -1,21 +1,21 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const verifyToken = require('../_middleware/authorize');
-const db = require('../_helpers/dbModel');
-const { Readable } = require('stream');
-const { Blob } = require('buffer');
-const multer = require('multer');
-const config = require('../_helpers/config.json');
-const { Sequelize, QueryTypes } = require('sequelize');
+const verifyToken = require("../_middleware/authorize");
+const db = require("../_helpers/dbModel");
+const { Readable } = require("stream");
+const { Blob } = require("buffer");
+const multer = require("multer");
+const config = require("../_helpers/config.json");
+const { Sequelize, QueryTypes } = require("sequelize");
 
 const upload = multer();
-router.get('/', verifyToken, getProfileDetails);
-router.put('/updatePic', upload.any(), verifyToken, updateProfilePic);
+router.get("/", verifyToken, getProfileDetails);
+router.put("/updatePic", upload.any(), verifyToken, updateProfilePic);
 
-router.put('/updateInfo', verifyToken, upadteInfo);
+router.put("/updateInfo", verifyToken, upadteInfo);
 
-router.put('/updateStudentDetails', verifyToken, updateStudentData);
-router.put('/deleteStuInfo', verifyToken, deleteStudInfo);
+router.put("/updateStudentDetails", verifyToken, updateStudentData);
+router.put("/deleteStuInfo", verifyToken, deleteStudInfo);
 
 module.exports = router;
 
@@ -24,7 +24,7 @@ async function getProfileDetails(req, res, next) {
   const { host, port, user, password, database } = config.database;
 
   const sequelize = new Sequelize(database, user, password, {
-    dialect: 'mysql',
+    dialect: "mysql",
   });
 
   const countQuery = `SELECT
@@ -60,7 +60,7 @@ order by total_score DESC
 
   try {
     let profileDetails = await db.User.findOne({
-      attributes: { exclude: ['password', 'uuid'] },
+      attributes: { exclude: ["password", "uuid"] },
       where: {
         id: userID,
       },
@@ -96,12 +96,12 @@ order by total_score DESC
       rank: results?.ranks || 0,
     };
 
-    console.log(profileDetails, 'vv');
+    console.log(profileDetails, "vv");
     return res.status(200).json(profileDetails);
   } catch (error) {
-    console.log(error, 'vv');
+    console.log(error, "vv");
 
-    return res.status(500).send('error while fetching profile details');
+    return res.status(500).send("error while fetching profile details");
   }
 }
 
@@ -124,10 +124,10 @@ async function updateProfilePic(req, res, next) {
         },
       }
     );
-    return res.status(200).send('profilepic is updated Successfully');
+    return res.status(200).send("profilepic is updated Successfully");
   } catch (error) {
     console.log(error);
-    return res.status(500).send('error while updating profile details');
+    return res.status(500).send("error while updating profile details");
   }
 }
 
@@ -163,7 +163,7 @@ async function upadteInfo(req, res, next) {
 
     return res.status(200).json(updatedInfo);
   } catch (error) {
-    return res.status(500).send('error when updating profile');
+    return res.status(500).send("error when updating profile");
   }
 }
 
@@ -174,7 +174,7 @@ async function updateStudentData(req, res, next) {
         user_id: req.user.sub.userId,
       },
     });
-    if (req.body.type === 'CLUBS') {
+    if (req.body.type === "CLUBS") {
       const { club_level, club_name, id } = req.body;
 
       let communication;
@@ -193,34 +193,34 @@ async function updateStudentData(req, res, next) {
         },
       });
 
-      if (club_level === 'president') {
+      if (club_level === "president") {
         communication = 5;
         leadership = 5;
         descision_making = 2;
         team_work = 3;
-      } else if (club_level === 'lead') {
+      } else if (club_level === "lead") {
         communication = 4;
         leadership = 3;
         descision_making = 1;
         team_work = 2;
-      } else if (club_level === 'member') {
+      } else if (club_level === "member") {
         communication = 3;
         leadership = 0;
         descision_making = 1;
         team_work = 1;
       }
 
-      if (clubDetails.club_level === 'president') {
+      if (clubDetails.club_level === "president") {
         communicationDeleted = 5;
         leadershipDeleted = 5;
         descision_makingDeleted = 2;
         team_workDeleted = 3;
-      } else if (clubDetails.club_level === 'lead') {
+      } else if (clubDetails.club_level === "lead") {
         communicationDeleted = 4;
         leadershipDeleted = 3;
         descision_makingDeleted = 1;
         team_workDeleted = 2;
-      } else if (clubDetails.club_level === 'member') {
+      } else if (clubDetails.club_level === "member") {
         communicationDeleted = 3;
         leadershipDeleted = 0;
         descision_makingDeleted = 1;
@@ -257,7 +257,7 @@ async function updateStudentData(req, res, next) {
           },
         }
       );
-    } else if (req.body.type === 'SPORT') {
+    } else if (req.body.type === "SPORT") {
       const { id, cardinality, level, sport_name, position } = req.body;
 
       const res = await db.Sport.findOne({
@@ -266,7 +266,7 @@ async function updateStudentData(req, res, next) {
         },
       });
 
-      console.log(res, 'res');
+      console.log(res, "res");
 
       const resltsToBeDeleted = await getdeletedSportVal(
         res.level,
@@ -310,7 +310,7 @@ async function updateStudentData(req, res, next) {
           },
         }
       );
-    } else if (req.body.type === 'EVENT') {
+    } else if (req.body.type === "EVENT") {
       const { position, cardinality, level, event_name, id } = req.body;
 
       let teamwork = null;
@@ -333,23 +333,23 @@ async function updateStudentData(req, res, next) {
 
       //tobe added
 
-      if (level === 'university') {
-        if (position === '1') {
-          if (cardinality === 'leader') {
+      if (level === "university") {
+        if (position === "1") {
+          if (cardinality === "leader") {
             teamwork = 3;
             leadership = 3;
             problem_solving = 3;
             creativity = 3;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 4;
             problem_solving = 4;
             descision_making = 4;
             creativity = 4;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
@@ -357,22 +357,22 @@ async function updateStudentData(req, res, next) {
             teamwork = 0;
           }
         }
-        if (position === '2') {
-          if (cardinality === 'leader') {
+        if (position === "2") {
+          if (cardinality === "leader") {
             teamwork = 2;
             leadership = 2;
             problem_solving = 2;
             creativity = 2;
             descision_making = 2;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 3;
             problem_solving = 3;
             descision_making = 2;
             creativity = 2;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 5;
             descision_making = 3;
             creativity = 2;
@@ -381,22 +381,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (position === '3') {
-          if (cardinality === 'leader') {
+        if (position === "3") {
+          if (cardinality === "leader") {
             teamwork = 1;
             leadership = 1;
             problem_solving = 1;
             creativity = 1;
             descision_making = 1;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 2;
             problem_solving = 1;
             descision_making = 1;
             creativity = 1;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 3;
             descision_making = 1;
             creativity = 1;
@@ -405,22 +405,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (position === 'part') {
-          if (cardinality === 'leader') {
+        if (position === "part") {
+          if (cardinality === "leader") {
             teamwork = 0.5;
             leadership = 0.5;
             problem_solving = 0.5;
             creativity = 0.5;
             descision_making = 0.5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 1;
             problem_solving = 0.5;
             descision_making = 0.5;
             creativity = 0.5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 1;
             descision_making = 1;
             creativity = 0.5;
@@ -428,23 +428,23 @@ async function updateStudentData(req, res, next) {
             teamwork = 0;
           }
         }
-      } else if (level === 'national') {
-        if (position === '1') {
-          if (cardinality === 'leader') {
+      } else if (level === "national") {
+        if (position === "1") {
+          if (cardinality === "leader") {
             teamwork = 4;
             leadership = 4;
             problem_solving = 4;
             creativity = 4;
             descision_making = 4;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 5;
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 10;
             descision_making = 5;
             creativity = 5;
@@ -453,22 +453,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (position === '2') {
-          if (cardinality === 'leader') {
+        if (position === "2") {
+          if (cardinality === "leader") {
             teamwork = 3;
             leadership = 3;
             problem_solving = 3;
             creativity = 3;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 4;
             problem_solving = 4;
             descision_making = 4;
             creativity = 3;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
@@ -477,22 +477,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (position === '3') {
-          if (cardinality === 'leader') {
+        if (position === "3") {
+          if (cardinality === "leader") {
             teamwork = 2;
             leadership = 2;
             problem_solving = 2;
             creativity = 2;
             descision_making = 2;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 3;
             problem_solving = 3;
             descision_making = 2;
             creativity = 2;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 5;
             descision_making = 3;
             creativity = 2;
@@ -501,22 +501,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (position === 'part') {
-          if (cardinality === 'leader') {
+        if (position === "part") {
+          if (cardinality === "leader") {
             teamwork = 0.5;
             leadership = 0.5;
             problem_solving = 0.5;
             creativity = 0.5;
             descision_making = 0.5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 1;
             problem_solving = 0.5;
             descision_making = 0.5;
             creativity = 0.5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 1;
             descision_making = 1;
             creativity = 0.5;
@@ -524,23 +524,23 @@ async function updateStudentData(req, res, next) {
             teamwork = 0;
           }
         }
-      } else if (level === 'international') {
-        if (position === '1') {
-          if (cardinality === 'leader') {
+      } else if (level === "international") {
+        if (position === "1") {
+          if (cardinality === "leader") {
             teamwork = 5;
             leadership = 5;
             problem_solving = 5;
             creativity = 5;
             descision_making = 5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 10;
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 15;
             descision_making = 5;
             creativity = 5;
@@ -548,22 +548,22 @@ async function updateStudentData(req, res, next) {
             teamwork = 0;
           }
         }
-        if (position === '2') {
-          if (cardinality === 'leader') {
+        if (position === "2") {
+          if (cardinality === "leader") {
             teamwork = 4;
             leadership = 4;
             problem_solving = 4;
             creativity = 4;
             descision_making = 4;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 5;
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 10;
             descision_making = 5;
             creativity = 5;
@@ -572,22 +572,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (position === '3') {
-          if (cardinality === 'leader') {
+        if (position === "3") {
+          if (cardinality === "leader") {
             teamwork = 3;
             leadership = 3;
             problem_solving = 3;
             creativity = 3;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 4;
             problem_solving = 4;
             descision_making = 4;
             creativity = 3;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
@@ -596,22 +596,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (position === 'part') {
-          if (cardinality === 'leader') {
+        if (position === "part") {
+          if (cardinality === "leader") {
             teamwork = 0.5;
             leadership = 0.5;
             problem_solving = 0.5;
             creativity = 0.5;
             descision_making = 0.5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 1;
             problem_solving = 0.5;
             descision_making = 0.5;
             creativity = 0.5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 1;
             descision_making = 1;
             creativity = 0.5;
@@ -623,16 +623,16 @@ async function updateStudentData(req, res, next) {
 
       //tobeDeleted
 
-      if (eventData?.level === 'university') {
-        if (eventData?.position === '1') {
-          if (eventData?.cardinality === 'leader') {
+      if (eventData?.level === "university") {
+        if (eventData?.position === "1") {
+          if (eventData?.cardinality === "leader") {
             teamworkDeleted = 3;
             leadershipDeleted = 3;
             problem_solvingDeleted = 3;
             creativityDeleted = 3;
             descision_makingDeleted = 3;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamwork = 4;
             problem_solvingDeleted = 4;
             descision_makingDeleted = 4;
@@ -640,7 +640,7 @@ async function updateStudentData(req, res, next) {
             leadershipDeleted = 0;
             teamworkDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 5;
             descision_makingDeleted = 5;
             creativityDeleted = 5;
@@ -648,22 +648,22 @@ async function updateStudentData(req, res, next) {
             teamworkDeleted = 0;
           }
         }
-        if (eventData?.position === '2') {
-          if (eventData?.cardinality === 'leader') {
+        if (eventData?.position === "2") {
+          if (eventData?.cardinality === "leader") {
             teamworkDeleted = 2;
             leadershipDeleted = 2;
             problem_solvingDeleted = 2;
             creativityDeleted = 2;
             descision_makingDeleted = 2;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamworkDeleted = 3;
             problem_solvingDeleted = 3;
             descision_makingDeleted = 2;
             creativityDeleted = 2;
             leadershipDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 5;
             descision_makingDeleted = 3;
             creativityDeleted = 2;
@@ -672,22 +672,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (eventData?.position === '3') {
-          if (eventData?.cardinality === 'leader') {
+        if (eventData?.position === "3") {
+          if (eventData?.cardinality === "leader") {
             teamworkDeleted = 1;
             leadershipDeleted = 1;
             problem_solvingDeleted = 1;
             creativityDeleted = 1;
             descision_makingDeleted = 1;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamwork = 2;
             problem_solvingDeleted = 1;
             descision_makingDeleted = 1;
             creativityDeleted = 1;
             leadershipDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 3;
             descision_makingDeleted = 1;
             creativityDeleted = 1;
@@ -696,22 +696,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (eventData?.position === 'part') {
-          if (cardinality === 'leader') {
+        if (eventData?.position === "part") {
+          if (cardinality === "leader") {
             teamworkDeleted = 0.5;
             leadershipDeleted = 0.5;
             problem_solvingDeleted = 0.5;
             creativityDeleted = 0.5;
             descision_makingDeleted = 0.5;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamwork = 1;
             problem_solvingDeleted = 0.5;
             descision_makingDeleted = 0.5;
             creativityDeleted = 0.5;
             leadershipDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 1;
             descision_makingDeleted = 1;
             creativityDeleted = 0.5;
@@ -719,23 +719,23 @@ async function updateStudentData(req, res, next) {
             teamworkDeleted = 0;
           }
         }
-      } else if (eventData?.level === 'national') {
-        if (eventData?.position === '1') {
-          if (eventData?.cardinality === 'leader') {
+      } else if (eventData?.level === "national") {
+        if (eventData?.position === "1") {
+          if (eventData?.cardinality === "leader") {
             teamworkDeleted = 4;
             leadershipDeleted = 4;
             problem_solvingDeleted = 4;
             creativityDeleted = 4;
             descision_makingDeleted = 4;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamworkDeleted = 5;
             problem_solvingDeleted = 5;
             descision_makingDeleted = 5;
             creativityDeleted = 5;
             leadershipDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 10;
             descision_makingDeleted = 5;
             creativityDeleted = 5;
@@ -744,22 +744,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (eventData?.position === '2') {
-          if (eventData?.cardinality === 'leader') {
+        if (eventData?.position === "2") {
+          if (eventData?.cardinality === "leader") {
             teamworkDeleted = 3;
             leadershipDeleted = 3;
             problem_solvingDeleted = 3;
             creativityDeleted = 3;
             descision_makingDeleted = 3;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamworkDeleted = 4;
             problem_solvingDeleted = 4;
             descision_makingDeleted = 4;
             creativityDeleted = 3;
             leadershipDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 5;
             descision_makingDeleted = 5;
             creativityDeleted = 5;
@@ -768,22 +768,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (eventData?.position === '3') {
-          if (eventData?.cardinality === 'leader') {
+        if (eventData?.position === "3") {
+          if (eventData?.cardinality === "leader") {
             teamworkDeleted = 2;
             leadershipDeleted = 2;
             problem_solvingDeleted = 2;
             creativityDeleted = 2;
             descision_makingDeleted = 2;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamworkDeleted = 3;
             problem_solvingDeleted = 3;
             descision_makingDeleted = 2;
             creativityDeleted = 2;
             leadershipDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 5;
             descision_makingDeleted = 3;
             creativityDeleted = 2;
@@ -792,22 +792,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (eventData?.position === 'part') {
-          if (eventData?.cardinality === 'leader') {
+        if (eventData?.position === "part") {
+          if (eventData?.cardinality === "leader") {
             teamworkDeleted = 0.5;
             leadershipDeleted = 0.5;
             problem_solvingDeleted = 0.5;
             creativityDeleted = 0.5;
             descision_makingDeleted = 0.5;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamworkDeleted = 1;
             problem_solvingDeleted = 0.5;
             descision_makingDeleted = 0.5;
             creativityDeleted = 0.5;
             leadershipDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 1;
             descision_makingDeleted = 1;
             creativityDeleted = 0.5;
@@ -815,23 +815,23 @@ async function updateStudentData(req, res, next) {
             teamworkDeleted = 0;
           }
         }
-      } else if (eventData?.level === 'international') {
-        if (eventData?.position === '1') {
-          if (eventData?.cardinality === 'leader') {
+      } else if (eventData?.level === "international") {
+        if (eventData?.position === "1") {
+          if (eventData?.cardinality === "leader") {
             teamworkDeleted = 5;
             leadershipDeleted = 5;
             problem_solvingDeleted = 5;
             creativityDeleted = 5;
             descision_makingDeleted = 5;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamworkDeleted = 10;
             problem_solvingDeleted = 5;
             descision_makingDeleted = 5;
             creativityDeleted = 5;
             leadershipDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 15;
             descision_makingDeleted = 5;
             creativityDeleted = 5;
@@ -839,22 +839,22 @@ async function updateStudentData(req, res, next) {
             teamworkDeleted = 0;
           }
         }
-        if (eventData?.position === '2') {
-          if (eventData?.cardinality === 'leader') {
+        if (eventData?.position === "2") {
+          if (eventData?.cardinality === "leader") {
             teamworkDeleted = 4;
             leadershipDeleted = 4;
             problem_solvingDeleted = 4;
             creativityDeleted = 4;
             descision_makingDeleted = 4;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamworkDeleted = 5;
             problem_solvingDeleted = 5;
             descision_makingDeleted = 5;
             creativityDeleted = 5;
             leadershipDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 10;
             descision_makingDeleted = 5;
             creativityDeleted = 5;
@@ -863,22 +863,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (eventData?.position === '3') {
-          if (eventData?.cardinality === 'leader') {
+        if (eventData?.position === "3") {
+          if (eventData?.cardinality === "leader") {
             teamworkDeleted = 3;
             leadershipDeleted = 3;
             problem_solvingDeleted = 3;
             creativityDeleted = 3;
             descision_makingDeleted = 3;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamworkDeleted = 4;
             problem_solvingDeleted = 4;
             descision_makingDeleted = 4;
             creativityDeleted = 3;
             leadershipDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 5;
             descision_makingDeleted = 5;
             creativityDeleted = 5;
@@ -887,22 +887,22 @@ async function updateStudentData(req, res, next) {
           }
         }
 
-        if (eventData?.position === 'part') {
-          if (eventData?.cardinality === 'leader') {
+        if (eventData?.position === "part") {
+          if (eventData?.cardinality === "leader") {
             teamworkDeleted = 0.5;
             leadershipDeleted = 0.5;
             problem_solvingDeleted = 0.5;
             creativityDeleted = 0.5;
             descision_makingDeleted = 0.5;
           }
-          if (eventData?.cardinality === 'member') {
+          if (eventData?.cardinality === "member") {
             teamworkDeleted = 1;
             problem_solvingDeleted = 0.5;
             descision_makingDeleted = 0.5;
             creativityDeleted = 0.5;
             leadershipDeleted = 0;
           }
-          if (eventData?.cardinality === 'individual') {
+          if (eventData?.cardinality === "individual") {
             problem_solvingDeleted = 1;
             descision_makingDeleted = 1;
             creativityDeleted = 0.5;
@@ -942,7 +942,7 @@ async function updateStudentData(req, res, next) {
         problem_solvingVal,
       };
 
-      console.log(data, 'lll');
+      console.log(data, "lll");
 
       const payload = {
         leadership: leadershipVal - leadershipDeleted + leadership,
@@ -972,7 +972,7 @@ async function updateStudentData(req, res, next) {
           },
         }
       );
-    } else if (req.body.type === 'SELF_LEARNINGS') {
+    } else if (req.body.type === "SELF_LEARNINGS") {
       const { course_level, course_name, id } = req.body;
 
       let knowledgeSkill = null;
@@ -988,24 +988,24 @@ async function updateStudentData(req, res, next) {
           id,
         },
       });
-      if (course_level === 'beginner') {
+      if (course_level === "beginner") {
         knowledgeSkill = 5;
         (psSkill = 5), (creativity = 5);
-      } else if (course_level === 'intermediate') {
+      } else if (course_level === "intermediate") {
         knowledgeSkill = 10;
         (psSkill = 5), (creativity = 5);
-      } else if (course_level === 'expert') {
+      } else if (course_level === "expert") {
         knowledgeSkill = 10;
         (psSkill = 10), (creativity = 5);
       }
 
-      if (selfLearningDetails.course_level === 'beginner') {
+      if (selfLearningDetails.course_level === "beginner") {
         KnowDeleted = 5;
         (psSkillDeleted = 5), (creativityDeleted = 5);
-      } else if (selfLearningDetails.course_level === 'intermediate') {
+      } else if (selfLearningDetails.course_level === "intermediate") {
         KnowDeleted = 10;
         (psSkillDeleted = 5), (creativityDeleted = 5);
-      } else if (selfLearningDetails.course_level === 'expert') {
+      } else if (selfLearningDetails.course_level === "expert") {
         KnowDeleted = 10;
         (psSkillDeleted = 10), (creativityDeleted = 5);
       }
@@ -1040,10 +1040,10 @@ async function updateStudentData(req, res, next) {
       );
     }
 
-    return res.status(200).send('succefully  updated the  profile ');
+    return res.status(200).send("succefully  updated the  profile ");
   } catch (error) {
     console.log(error);
-    return res.status(500).send('error when updating profile ');
+    return res.status(500).send("error when updating profile ");
   }
 }
 
@@ -1054,7 +1054,7 @@ async function deleteStudInfo(req, res, next) {
         user_id: req.user.sub.userId,
       },
     });
-    if (req.body.type === 'CLUBS') {
+    if (req.body.type === "CLUBS") {
       const { id } = req.body;
 
       let communicationDeleted;
@@ -1068,17 +1068,17 @@ async function deleteStudInfo(req, res, next) {
         },
       });
 
-      if (clubDetails.club_level === 'president') {
+      if (clubDetails.club_level === "president") {
         communicationDeleted = 5;
         leadershipDeleted = 5;
         descision_makingDeleted = 2;
         team_workDeleted = 3;
-      } else if (clubDetails.club_level === 'lead') {
+      } else if (clubDetails.club_level === "lead") {
         communicationDeleted = 4;
         leadershipDeleted = 3;
         descision_makingDeleted = 1;
         team_workDeleted = 2;
-      } else if (clubDetails.club_level === 'member') {
+      } else if (clubDetails.club_level === "member") {
         communicationDeleted = 3;
         leadershipDeleted = 0;
         descision_makingDeleted = 1;
@@ -1109,7 +1109,7 @@ async function deleteStudInfo(req, res, next) {
           id,
         },
       });
-    } else if (req.body.type === 'SELF_LEARNINGS') {
+    } else if (req.body.type === "SELF_LEARNINGS") {
       const { id } = req.body;
 
       let knowledgeSkill = 0;
@@ -1122,13 +1122,13 @@ async function deleteStudInfo(req, res, next) {
         },
       });
 
-      if (selfLearningData?.course_level === 'beginner') {
+      if (selfLearningData?.course_level === "beginner") {
         knowledgeSkill = 5;
         (psSkill = 5), (creativity = 5);
-      } else if (selfLearningData?.course_level === 'intermediate') {
+      } else if (selfLearningData?.course_level === "intermediate") {
         knowledgeSkill = 10;
         (psSkill = 5), (creativity = 5);
-      } else if (selfLearningData?.course_level === 'expert') {
+      } else if (selfLearningData?.course_level === "expert") {
         knowledgeSkill = 10;
         (psSkill = 10), (creativity = 5);
       }
@@ -1155,7 +1155,7 @@ async function deleteStudInfo(req, res, next) {
           id,
         },
       });
-    } else if (req.body.type === 'EVENT') {
+    } else if (req.body.type === "EVENT") {
       const { id } = req.body;
 
       const { level, position, cardinality } = await db.Event.findOne({
@@ -1170,23 +1170,23 @@ async function deleteStudInfo(req, res, next) {
       let leadership = 0;
       let descision_making = 0;
 
-      if (level === 'university') {
-        if (position === '1') {
-          if (cardinality === 'leader') {
+      if (level === "university") {
+        if (position === "1") {
+          if (cardinality === "leader") {
             teamwork = 3;
             leadership = 3;
             problem_solving = 3;
             creativity = 3;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 4;
             problem_solving = 4;
             descision_making = 4;
             creativity = 4;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
@@ -1194,22 +1194,22 @@ async function deleteStudInfo(req, res, next) {
             teamwork = 0;
           }
         }
-        if (position === '2') {
-          if (cardinality === 'leader') {
+        if (position === "2") {
+          if (cardinality === "leader") {
             teamwork = 2;
             leadership = 2;
             problem_solving = 2;
             creativity = 2;
             descision_making = 2;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 3;
             problem_solving = 3;
             descision_making = 2;
             creativity = 2;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 5;
             descision_making = 3;
             creativity = 2;
@@ -1218,22 +1218,22 @@ async function deleteStudInfo(req, res, next) {
           }
         }
 
-        if (position === '3') {
-          if (cardinality === 'leader') {
+        if (position === "3") {
+          if (cardinality === "leader") {
             teamwork = 1;
             leadership = 1;
             problem_solving = 1;
             creativity = 1;
             descision_making = 1;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 2;
             problem_solving = 1;
             descision_making = 1;
             creativity = 1;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 3;
             descision_making = 1;
             creativity = 1;
@@ -1242,22 +1242,22 @@ async function deleteStudInfo(req, res, next) {
           }
         }
 
-        if (position === 'part') {
-          if (cardinality === 'leader') {
+        if (position === "part") {
+          if (cardinality === "leader") {
             teamwork = 0.5;
             leadership = 0.5;
             problem_solving = 0.5;
             creativity = 0.5;
             descision_making = 0.5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 1;
             problem_solving = 0.5;
             descision_making = 0.5;
             creativity = 0.5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 1;
             descision_making = 1;
             creativity = 0.5;
@@ -1265,23 +1265,23 @@ async function deleteStudInfo(req, res, next) {
             teamwork = 0;
           }
         }
-      } else if (level === 'national') {
-        if (position === '1') {
-          if (cardinality === 'leader') {
+      } else if (level === "national") {
+        if (position === "1") {
+          if (cardinality === "leader") {
             teamwork = 4;
             leadership = 4;
             problem_solving = 4;
             creativity = 4;
             descision_making = 4;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 5;
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 10;
             descision_making = 5;
             creativity = 5;
@@ -1290,22 +1290,22 @@ async function deleteStudInfo(req, res, next) {
           }
         }
 
-        if (position === '2') {
-          if (cardinality === 'leader') {
+        if (position === "2") {
+          if (cardinality === "leader") {
             teamwork = 3;
             leadership = 3;
             problem_solving = 3;
             creativity = 3;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 4;
             problem_solving = 4;
             descision_making = 4;
             creativity = 3;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
@@ -1314,22 +1314,22 @@ async function deleteStudInfo(req, res, next) {
           }
         }
 
-        if (position === '3') {
-          if (cardinality === 'leader') {
+        if (position === "3") {
+          if (cardinality === "leader") {
             teamwork = 2;
             leadership = 2;
             problem_solving = 2;
             creativity = 2;
             descision_making = 2;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 3;
             problem_solving = 3;
             descision_making = 2;
             creativity = 2;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 5;
             descision_making = 3;
             creativity = 2;
@@ -1338,22 +1338,22 @@ async function deleteStudInfo(req, res, next) {
           }
         }
 
-        if (position === 'part') {
-          if (cardinality === 'leader') {
+        if (position === "part") {
+          if (cardinality === "leader") {
             teamwork = 0.5;
             leadership = 0.5;
             problem_solving = 0.5;
             creativity = 0.5;
             descision_making = 0.5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 1;
             problem_solving = 0.5;
             descision_making = 0.5;
             creativity = 0.5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 1;
             descision_making = 1;
             creativity = 0.5;
@@ -1361,23 +1361,23 @@ async function deleteStudInfo(req, res, next) {
             teamwork = 0;
           }
         }
-      } else if (level === 'international') {
-        if (position === '1') {
-          if (cardinality === 'leader') {
+      } else if (level === "international") {
+        if (position === "1") {
+          if (cardinality === "leader") {
             teamwork = 5;
             leadership = 5;
             problem_solving = 5;
             creativity = 5;
             descision_making = 5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 10;
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 15;
             descision_making = 5;
             creativity = 5;
@@ -1385,22 +1385,22 @@ async function deleteStudInfo(req, res, next) {
             teamwork = 0;
           }
         }
-        if (position === '2') {
-          if (cardinality === 'leader') {
+        if (position === "2") {
+          if (cardinality === "leader") {
             teamwork = 4;
             leadership = 4;
             problem_solving = 4;
             creativity = 4;
             descision_making = 4;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 5;
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 10;
             descision_making = 5;
             creativity = 5;
@@ -1409,22 +1409,22 @@ async function deleteStudInfo(req, res, next) {
           }
         }
 
-        if (position === '3') {
-          if (cardinality === 'leader') {
+        if (position === "3") {
+          if (cardinality === "leader") {
             teamwork = 3;
             leadership = 3;
             problem_solving = 3;
             creativity = 3;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 4;
             problem_solving = 4;
             descision_making = 4;
             creativity = 3;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 5;
             descision_making = 5;
             creativity = 5;
@@ -1433,22 +1433,22 @@ async function deleteStudInfo(req, res, next) {
           }
         }
 
-        if (position === 'part') {
-          if (cardinality === 'leader') {
+        if (position === "part") {
+          if (cardinality === "leader") {
             teamwork = 0.5;
             leadership = 0.5;
             problem_solving = 0.5;
             creativity = 0.5;
             descision_making = 0.5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 1;
             problem_solving = 0.5;
             descision_making = 0.5;
             creativity = 0.5;
             leadership = 0;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             problem_solving = 1;
             descision_making = 1;
             creativity = 0.5;
@@ -1486,7 +1486,7 @@ async function deleteStudInfo(req, res, next) {
           id,
         },
       });
-    } else if (req.body.type === 'SPORT') {
+    } else if (req.body.type === "SPORT") {
       const { id } = req.body;
 
       const { level, position, cardinality } = await db.Sport.findOne({
@@ -1499,215 +1499,215 @@ async function deleteStudInfo(req, res, next) {
       let leadership = 0;
       let descision_making = 0;
 
-      if (level === 'university') {
-        if (position === '1') {
-          if (cardinality === 'leader') {
+      if (level === "university") {
+        if (position === "1") {
+          if (cardinality === "leader") {
             descision_making = 3;
             leadership = 2;
             teamwork = 2;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             descision_making = 3;
             leadership = 0;
             teamwork = 4;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             descision_making = 7;
             leadership = 0;
             teamwork = 0;
           }
         }
-        if (position === '2') {
-          if (cardinality === 'leader') {
+        if (position === "2") {
+          if (cardinality === "leader") {
             teamwork = 1;
             leadership = 2;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 3;
             leadership = 0;
             descision_making = 3;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             teamwork = 0;
             leadership = 0;
             descision_making = 6;
           }
         }
 
-        if (position === '3') {
-          if (cardinality === 'leader') {
+        if (position === "3") {
+          if (cardinality === "leader") {
             teamwork = 1;
             leadership = 1;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 3;
             leadership = 0;
             descision_making = 2;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             teamwork = 0;
             leadership = 0;
             descision_making = 5;
           }
         }
 
-        if (position === 'part') {
-          if (cardinality === 'leader') {
+        if (position === "part") {
+          if (cardinality === "leader") {
             teamwork = 1;
             leadership = 0.5;
             descision_making = 0.5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 1;
             leadership = 0;
             descision_making = 1;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             teamwork = 0;
             leadership = 0;
             descision_making = 2;
           }
         }
-      } else if (level === 'national') {
-        if (position === '1') {
-          if (cardinality === 'leader') {
+      } else if (level === "national") {
+        if (position === "1") {
+          if (cardinality === "leader") {
             teamwork = 2;
             leadership = 3;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 4;
             leadership = 0;
             descision_making = 4;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             teamwork = 0;
             leadership = 0;
             descision_making = 8;
           }
         }
 
-        if (position === '2') {
-          if (cardinality === 'leader') {
+        if (position === "2") {
+          if (cardinality === "leader") {
             teamwork = 2;
             leadership = 2;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 4;
             leadership = 0;
             descision_making = 3;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             teamwork = 0;
             leadership = 0;
             descision_making = 7;
           }
         }
 
-        if (position === '3') {
-          if (cardinality === 'leader') {
+        if (position === "3") {
+          if (cardinality === "leader") {
             teamwork = 1;
             leadership = 2;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 3;
             leadership = 0;
             descision_making = 3;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             teamwork = 0;
             leadership = 0;
             descision_making = 6;
           }
         }
 
-        if (position === 'part') {
-          if (cardinality === 'leader') {
+        if (position === "part") {
+          if (cardinality === "leader") {
             teamwork = 1;
             leadership = 0.5;
             descision_making = 0.5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 1;
             leadership = 0;
             descision_making = 1;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             teamwork = 0;
             leadership = 0;
             descision_making = 2;
           }
         }
-      } else if (level === 'international') {
-        if (position === '1') {
-          if (cardinality === 'leader') {
+      } else if (level === "international") {
+        if (position === "1") {
+          if (cardinality === "leader") {
             teamwork = 2;
             leadership = 3;
             descision_making = 5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 5;
             leadership = 0;
             descision_making = 5;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             teamwork = 0;
             leadership = 0;
             descision_making = 10;
           }
         }
-        if (position === '2') {
-          if (cardinality === 'leader') {
+        if (position === "2") {
+          if (cardinality === "leader") {
             teamwork = 2;
             leadership = 2;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 4;
             leadership = 0;
             descision_making = 4;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             teamwork = 0;
             leadership = 0;
             descision_making = 8;
           }
         }
 
-        if (position === '3') {
-          if (cardinality === 'leader') {
+        if (position === "3") {
+          if (cardinality === "leader") {
             teamwork = 2;
             leadership = 2;
             descision_making = 3;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 4;
             leadership = 0;
             descision_making = 3;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             teamwork = 0;
             leadership = 0;
             descision_making = 7;
           }
         }
 
-        if (position === 'part') {
-          if (cardinality === 'leader') {
+        if (position === "part") {
+          if (cardinality === "leader") {
             teamwork = 1;
             leadership = 0.5;
             descision_making = 0.5;
           }
-          if (cardinality === 'member') {
+          if (cardinality === "member") {
             teamwork = 1;
             leadership = 0;
             descision_making = 1;
           }
-          if (cardinality === 'individual') {
+          if (cardinality === "individual") {
             teamwork = 0;
             leadership = 0;
             descision_making = 2;
@@ -1739,10 +1739,10 @@ async function deleteStudInfo(req, res, next) {
       });
     }
 
-    return res.status(200).send('update profile is completed');
+    return res.status(200).send("update profile is completed");
   } catch (error) {
-    console.log(error, 'err');
-    return res.status(500).send('error when updating profile ');
+    console.log(error, "err");
+    return res.status(500).send("error when updating profile ");
   }
 }
 
@@ -1751,215 +1751,215 @@ async function getdeletedSportVal(level, position, cardinality) {
   let leadership = 0;
   let descision_making = 0;
 
-  if (level === 'university') {
-    if (position === '1') {
-      if (cardinality === 'leader') {
+  if (level === "university") {
+    if (position === "1") {
+      if (cardinality === "leader") {
         descision_making = 3;
         leadership = 2;
         teamwork = 2;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         descision_making = 3;
         leadership = 0;
         teamwork = 4;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         descision_making = 7;
         leadership = 0;
         teamwork = 0;
       }
     }
-    if (position === '2') {
-      if (cardinality === 'leader') {
+    if (position === "2") {
+      if (cardinality === "leader") {
         teamwork = 1;
         leadership = 2;
         descision_making = 3;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         teamwork = 3;
         leadership = 0;
         descision_making = 3;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         teamwork = 0;
         leadership = 0;
         descision_making = 6;
       }
     }
 
-    if (position === '3') {
-      if (cardinality === 'leader') {
+    if (position === "3") {
+      if (cardinality === "leader") {
         teamwork = 1;
         leadership = 1;
         descision_making = 3;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         teamwork = 3;
         leadership = 0;
         descision_making = 2;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         teamwork = 0;
         leadership = 0;
         descision_making = 5;
       }
     }
 
-    if (position === 'part') {
-      if (cardinality === 'leader') {
+    if (position === "part") {
+      if (cardinality === "leader") {
         teamwork = 1;
         leadership = 0.5;
         descision_making = 0.5;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         teamwork = 1;
         leadership = 0;
         descision_making = 1;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         teamwork = 0;
         leadership = 0;
         descision_making = 2;
       }
     }
-  } else if (level === 'national') {
-    if (position === '1') {
-      if (cardinality === 'leader') {
+  } else if (level === "national") {
+    if (position === "1") {
+      if (cardinality === "leader") {
         teamwork = 2;
         leadership = 3;
         descision_making = 3;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         teamwork = 4;
         leadership = 0;
         descision_making = 4;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         teamwork = 0;
         leadership = 0;
         descision_making = 8;
       }
     }
 
-    if (position === '2') {
-      if (cardinality === 'leader') {
+    if (position === "2") {
+      if (cardinality === "leader") {
         teamwork = 2;
         leadership = 2;
         descision_making = 3;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         teamwork = 4;
         leadership = 0;
         descision_making = 3;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         teamwork = 0;
         leadership = 0;
         descision_making = 7;
       }
     }
 
-    if (position === '3') {
-      if (cardinality === 'leader') {
+    if (position === "3") {
+      if (cardinality === "leader") {
         teamwork = 1;
         leadership = 2;
         descision_making = 3;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         teamwork = 3;
         leadership = 0;
         descision_making = 3;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         teamwork = 0;
         leadership = 0;
         descision_making = 6;
       }
     }
 
-    if (position === 'part') {
-      if (cardinality === 'leader') {
+    if (position === "part") {
+      if (cardinality === "leader") {
         teamwork = 1;
         leadership = 0.5;
         descision_making = 0.5;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         teamwork = 1;
         leadership = 0;
         descision_making = 1;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         teamwork = 0;
         leadership = 0;
         descision_making = 2;
       }
     }
-  } else if (level === 'international') {
-    if (position === '1') {
-      if (cardinality === 'leader') {
+  } else if (level === "international") {
+    if (position === "1") {
+      if (cardinality === "leader") {
         teamwork = 2;
         leadership = 3;
         descision_making = 5;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         teamwork = 5;
         leadership = 0;
         descision_making = 5;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         teamwork = 0;
         leadership = 0;
         descision_making = 10;
       }
     }
-    if (position === '2') {
-      if (cardinality === 'leader') {
+    if (position === "2") {
+      if (cardinality === "leader") {
         teamwork = 2;
         leadership = 3;
         descision_making = 3;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         teamwork = 4;
         leadership = 0;
         descision_making = 4;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         teamwork = 0;
         leadership = 0;
         descision_making = 8;
       }
     }
 
-    if (position === '3') {
-      if (cardinality === 'leader') {
+    if (position === "3") {
+      if (cardinality === "leader") {
         teamwork = 2;
         leadership = 2;
         descision_making = 3;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         teamwork = 4;
         leadership = 0;
         descision_making = 3;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         teamwork = 0;
         leadership = 0;
         descision_making = 7;
       }
     }
 
-    if (position === 'part') {
-      if (cardinality === 'leader') {
+    if (position === "part") {
+      if (cardinality === "leader") {
         teamwork = 1;
         leadership = 0.5;
         descision_making = 0.5;
       }
-      if (cardinality === 'member') {
+      if (cardinality === "member") {
         teamwork = 1;
         leadership = 0;
         descision_making = 1;
       }
-      if (cardinality === 'individual') {
+      if (cardinality === "individual") {
         teamwork = 0;
         leadership = 0;
         descision_making = 2;
