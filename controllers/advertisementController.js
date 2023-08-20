@@ -121,9 +121,13 @@ async function deleteAd(req, res, next) {
 async function getAlladvertisement(req, res, next) {
   const { date } = req.body;
 
-  let startDate = new Date(date);
-
   try {
+    if (!date) {
+      const resultsData = await db.Advertisement.findAll({});
+      return res.status(200).json(resultsData);
+    }
+
+    let startDate = new Date(date);
     const results = await db.Advertisement.findAll({
       where: {
         date: {

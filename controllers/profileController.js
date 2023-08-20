@@ -5,6 +5,9 @@ const db = require('../_helpers/dbModel');
 const { Readable } = require('stream');
 const { Blob } = require('buffer');
 const multer = require('multer');
+const config = require('../_helpers/config.json');
+const { Sequelize, QueryTypes } = require('sequelize');
+
 const upload = multer();
 router.get('/', verifyToken, getProfileDetails);
 router.put('/updatePic', upload.any(), verifyToken, updateProfilePic);
@@ -18,9 +21,45 @@ module.exports = router;
 
 async function getProfileDetails(req, res, next) {
   const userID = req.user.sub.userId;
+  const { host, port, user, password, database } = config.database;
+
+  const sequelize = new Sequelize(database, user, password, {
+    dialect: 'mysql',
+  });
+
+  const countQuery = `SELECT
+  u.id,u.status,u.index_no,
+  u.first_name AS 'firstName',
+  u.last_name AS 'lastName',
+  u.index_no AS 'indexNo',
+  u.role_id,
+  COALESCE(user_scores.total_score, 0) AS total_score,
+  user_scores.ranks
+FROM
+  users u
+LEFT JOIN (
+  SELECT
+      u.id,
+      SUM(COALESCE(s.knowledge, 0) + COALESCE(s.creativity, 0) + COALESCE(s.problem_solving, 0) + COALESCE(s.communication, 0) +COALESCE(s.descision_making, 0)+COALESCE(s.team_work, 0)+COALESCE(s.leadership, 0)) AS total_score,
+      RANK() OVER (ORDER BY SUM(COALESCE(s.knowledge, 0) + COALESCE(s.creativity, 0) + COALESCE(s.problem_solving, 0) + COALESCE(s.communication, 0) +COALESCE(s.descision_making, 0)+COALESCE(s.team_work, 0)+COALESCE(s.leadership, 0)) DESC) AS 'ranks'
+  FROM
+      users u
+  JOIN
+      skills s ON u.id = s.user_id
+  GROUP BY
+      u.id
+) AS user_scores ON user_scores.id = u.id
+where status like 'active' and role_id = 1 
+order by total_score DESC
+`;
+  let results = await sequelize.query(countQuery, {
+    type: QueryTypes.SELECT,
+  });
+
+  results = results.find((res) => res.id === userID);
 
   try {
-    const profileDetails = await db.User.findOne({
+    let profileDetails = await db.User.findOne({
       attributes: { exclude: ['password', 'uuid'] },
       where: {
         id: userID,
@@ -49,8 +88,19 @@ async function getProfileDetails(req, res, next) {
         },
       ],
     });
+
+    profileDetails = profileDetails.toJSON();
+
+    profileDetails = {
+      ...profileDetails,
+      rank: results?.ranks || 0,
+    };
+
+    console.log(profileDetails, 'vv');
     return res.status(200).json(profileDetails);
   } catch (error) {
+    console.log(error, 'vv');
+
     return res.status(500).send('error while fetching profile details');
   }
 }
@@ -76,6 +126,7 @@ async function updateProfilePic(req, res, next) {
     );
     return res.status(200).send('profilepic is updated Successfully');
   } catch (error) {
+    console.log(error);
     return res.status(500).send('error while updating profile details');
   }
 }
